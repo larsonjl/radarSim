@@ -8,6 +8,7 @@ Created on Mon Mar  6 10:52:59 2017
 import numpy as np
 import scipy.io as sio
 import math
+import scipy.interpolate as interpolate
 
 # Auxilary functions 
 def degrees2radians(degrees):
@@ -28,6 +29,14 @@ def freq2lambda(frequency):
 def expNoise(samples, meanValue):
     return np.random.exponential(scale=meanValue, size=samples)
 
+def chiNoise(samples, meanValue, freedomDegrees):
+    xx = np.linspace(0, 4 * meanValue, 1000)
+    pdf = ((freedomDegrees * xx) / (meanValue**2)) * np.exp((-2 * xx) / meanValue)
+    pdf = pdf / np.sum(pdf)
+    cumVals = np.cumsum(pdf)
+    invCdf = interpolate.interp1d(cumVals, xx)
+    r = np.random.rand(samples)
+    return invCdf(r)
 
 # Input gain patterns
 gainDat = sio.loadmat('./InputData/antenna_pattern_N02_elements.mat')

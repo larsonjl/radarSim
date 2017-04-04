@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy  as np
 from scipy import signal
-from modelAttributes import radarVals, linear2db, finalValues, expNoise
+from modelAttributes import radarVals, linear2db, finalValues, expNoise, chiNoise
 
 
 # Print  out initial attributes
@@ -82,7 +82,7 @@ def generatePt3q1Figures():
     sampleNum = 10e3
     gSamples = expNoise(sampleNum, meanValue)
     
-    # Create theoretical
+    # Create theoretical exponential
     xx = np.linspace(0, np.max(gSamples), 500)
     yy = (1 / meanValue) * np.exp(-xx / meanValue)
 
@@ -99,12 +99,30 @@ def generatePt3q1Figures():
     plt.ylabel('P(x)')
     plt.xlabel('x')
     plt.xlim(0,)
-    plt.title('Exponential distribution theoretical and sampled (mean=2e-14, samples=10000)')
+    plt.title('Exponential distribution theoretical and sampled (mean=2e-14, n=10000)')
     plt.tight_layout()
     plt.savefig('./Figures/hw3q1_fig1.png', dpi=350)
     plt.close()
     
-    
+    # Create chi-square
+    chiSamples = chiNoise(10e3, 2e-14, 4)
+    yyChi = ((4 * xx) / (2e-14**2)) * np.exp((-2 * xx) / 2e-14)
+    plt.figure()
+    ax = plt.subplot(111)
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    plt.hist(chiSamples, 50, normed=True)
+    plt.plot(xx, yyChi)
+    plt.ylabel('P(x)')
+    plt.xlabel('x')
+    plt.xlim(0,1.2e-13)
+    plt.title('Chi-squared theoretical and sampled (mean=2e-14, n=10e3, degrees=4)')
+    plt.tight_layout()
+    plt.savefig('./Figures/hw3q1_fig2.png', dpi=350)
+    plt.close()
 
 
 # Plotting Stuff
