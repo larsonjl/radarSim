@@ -1,0 +1,96 @@
+
+## ====  Final  Values  ====  ##
+Pr = -155.94451914 dB
+Pr = -125.94451914 dBm
+Pr = 2.54418147451e-16 Watts
+Range  to Target = 2.22867516185 km
+Time  to Target = 1.48578344123e-05 s
+Time  of transmitted pulse = 1.0001 s
+
+## ====  Final  Values  ====  ##
+Pr = -156.001312983 dB
+Pr = -126.001312983 dBm
+Pr = 2.51112713884e-16 Watts
+Range  to Target = 2.23597332962 km
+Time  to Target = 1.49064888641e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -156.001312983 dB
+Pr = -126.001312983 dBm
+Pr = 2.51112713884e-16 Watts
+Range  to Target = 2.23597332962 km
+Time  to Target = 1.49064888641e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -156.001312983 dB
+Pr = -126.001312983 dBm
+Pr = 2.51112713884e-16 Watts
+Range  to Target = 2.23597332962 km
+Time  to Target = 1.49064888641e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -110.823224785 dB
+Pr = -80.8232247854 dBm
+Pr = 8.2732761647e-12 Watts
+Range  to Target = 0.999894179894 km
+Time  to Target = 6.66596119929e-06 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -110.823224785 dB
+Pr = -80.8232247854 dBm
+Pr = 8.2732761647e-12 Watts
+Range  to Target = 0.999894179894 km
+Time  to Target = 6.66596119929e-06 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.950806798 dB
+Pr = -111.950806798 dBm
+Pr = 6.3814492562e-15 Watts
+Range  to Target = 5.99989417989 km
+Time  to Target = 3.99992945326e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.950806798 dB
+Pr = -111.950806798 dBm
+Pr = 6.3814492562e-15 Watts
+Range  to Target = 5.99989417989 km
+Time  to Target = 3.99992945326e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.950806798 dB
+Pr = -111.950806798 dBm
+Pr = 6.3814492562e-15 Watts
+Range  to Target = 5.99989417989 km
+Time  to Target = 3.99992945326e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.949916341 dB
+Pr = -111.949916341 dBm
+Pr = 6.38275781288e-15 Watts
+Range  to Target = 5.99958664021 km
+Time  to Target = 3.99972442681e-05 s
+Time  of transmitted pulse = 0.0499 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.950806798 dB
+Pr = -111.950806798 dBm
+Pr = 6.3814492562e-15 Watts
+Range  to Target = 5.99989417989 km
+Time  to Target = 3.99992945326e-05 s
+Time  of transmitted pulse = 0.0127 s
+
+## ====  Final  Values  ====  ##
+Pr = -141.950806798 dB
+Pr = -111.950806798 dBm
+Pr = 6.3814492562e-15 Watts
+Range  to Target = 5.99989417989 km
+Time  to Target = 3.99992945326e-05 s
+Time  of transmitted pulse = 0.0127 s

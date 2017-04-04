@@ -9,11 +9,7 @@ import numpy as np
 import scipy.io as sio
 import math
 
-
-class simulationAttributes:
-    runtime = 24  # s
-
-
+# Auxilary functions 
 def degrees2radians(degrees):
     return (np.pi/180.) * degrees
 
@@ -29,13 +25,28 @@ def linear2db(linear):
 def freq2lambda(frequency):
     return (3e8) / frequency
 
+def expNoise(samples, meanValue):
+    return np.random.exponential(scale=meanValue, size=samples)
+
+
+# Input gain patterns
 gainDat = sio.loadmat('./InputData/antenna_pattern_N02_elements.mat')
 gainPattern = gainDat['antenna_gain_pattern_linear']
 radPattern = gainDat['normalized_radiation_pattern']
 phirange = gainDat['phi_range']
 
 
+class simulationAttributes:
+    runtime = 1  # s
+
 class radarVals:
+
+    class fftPts:
+        def __init__(self):
+            self.v = 256
+            self.nameString = "Points used for FFT"
+            self.units = "nPts"
+ 
     class transPower:
         def __init__(self):
             self.v = 10e3
@@ -57,6 +68,19 @@ class radarVals:
             self.v = 2.835e9
             self.nameString = "Transmit Frequency"
             self.units = "Hz"
+    
+    class wavenumber:
+        def __init__(self):
+            self.v = 1 / freq2lambda(radarVals.frequency().v)
+            self.nameString = "wavenumber"
+            self.units = "1/m"
+    
+    class wavelength:
+        def __init__(self):
+            self.v = freq2lambda(radarVals.frequency().v)
+            self.nameString = "wavelength"
+            self.units = "m"
+
 
     class tIpp:
         def __init__(self):
@@ -148,7 +172,15 @@ class radarVals:
         def __init__(self):
             tBeginning = (radarVals.tFirstRangeGate().v)
             tEnd = tBeginning + radarVals.tDiff().v * radarVals.totGates().v
-            self.v = 0.5 * 3e8 * np.arange(tBeginning, tEnd, radarVals.tDiff().v)
+            self.v = 0.5 * 3e8 * np.arange(tBeginning, tEnd,
+                                           radarVals.tDiff().v)
+
+    # Coherent integration
+    class numIntegrate:
+        def __init__(self):
+            self.v = 1
+            self.nameString = "Coherent integration number"
+            self.units = ""
 
 
 class targetVals:
@@ -160,19 +192,20 @@ class targetVals:
 
     class initPosition:
         def __init__(self):
-            self.v = [2e3, 1e3]
+            self.v = [0, 6e3]
             self.nameString = "Initial target position (x, y)"
             self.units = "m"
 
     class targetSpeed:
         def __init__(self):
-            self.v = 170
+            self.v =  (freq2lambda(radarVals.frequency().v) / radarVals.tIpp().v ) \
+                        * (2/radarVals.fftPts().v)
             self.nameString = "Target speed"
             self.units = "m/s"
 
     class attackAngle:
         def __init__(self):
-            self.v = 180
+            self.v = 270
             self.nameString = "Target angle of attack"
             self.units = "degrees"
 
@@ -310,20 +343,4 @@ class  finalValues:
         def __init__(self,  dist2target):
             self.v  = (1e-3)  * dist2target
             self.units = 'km'
-            self.nameString = "Range  to Target" 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.nameString = "Range  to Target"

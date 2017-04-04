@@ -9,7 +9,8 @@ import inspect
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy  as np
-from modelAttributes import radarVals, linear2db, finalValues
+from scipy import signal
+from modelAttributes import radarVals, linear2db, finalValues, expNoise
 
 
 # Print  out initial attributes
@@ -74,8 +75,154 @@ def printFinalValues(finalTime, finalPower, finalTime2Target, finalRange):
                                   ' ' + obj(finalRange).units + "\n")
 
 
-# Plot  data
-def generateFigures(transmitArr, arrivalTimeArr, returnPowerArr, sampleArr, snrArr):
+def generatePt3q1Figures():
+    sns.set_context('talk')
+    sns.set_style('ticks')
+    meanValue = 2e-14
+    sampleNum = 10e3
+    gSamples = expNoise(sampleNum, meanValue)
+    
+    # Create theoretical
+    xx = np.linspace(0, np.max(gSamples), 500)
+    yy = (1 / meanValue) * np.exp(-xx / meanValue)
+
+    # Plot
+    plt.figure()
+    ax = plt.subplot(111)
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    plt.hist(gSamples, 50, normed=True)
+    plt.plot(xx, yy)
+    plt.ylabel('P(x)')
+    plt.xlabel('x')
+    plt.xlim(0,)
+    plt.title('Exponential distribution theoretical and sampled (mean=2e-14, samples=10000)')
+    plt.tight_layout()
+    plt.savefig('./Figures/hw3q1_fig1.png', dpi=350)
+    plt.close()
+    
+    
+
+
+# Plotting Stuff
+def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
+    sns.set_context('talk')
+    sns.set_style('ticks')
+    # Q, I vs time 
+    plt.figure(figsize=(10,5))
+    ax = plt.subplot(111)
+    plt.plot(arrivalTimeArr * 1e3, iOut, label ='i')
+    plt.plot(arrivalTimeArr * 1e3, qOut, label = 'q')
+    plt.xlabel("Arrival time (mS)")
+    plt.ylabel("Amplitude")
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    ax.get_yaxis().get_major_formatter().set_useOffset(False)
+    plt.tight_layout()
+    plt.legend()
+    plt.savefig('./Figures/hw3q2_fig1_%s.png'%saveInfo, dpi=350)
+    plt.close()
+    
+    # Phasor diagram
+    plt.figure(figsize=(5,5))
+    sns.set_context('talk')
+    sns.set_style('ticks')
+    ax = plt.subplot(111)
+    plt.plot(iOut, qOut)
+    plt.xlabel('I')
+    plt.ylabel('Q')
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    plt.tight_layout()
+    ax.get_yaxis().get_major_formatter().set_useOffset(False)
+    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    ax.set_aspect('equal', 'datalim')
+    plt.savefig('./Figures/hw3q2_fig2_%s.png'%saveInfo, dpi=350)
+    plt.close()
+    
+    
+    # Verify return power = i^2 + q^2
+    powerIQ = (iOut**2 + qOut**2)
+    powerIQ = linear2db(powerIQ) + 30
+    plt.figure(figsize=(10,10))
+    ax = plt.subplot(111)
+    plt.plot(powerIQ, powerMeas)
+    plt.xlabel('I^2 + Q^2 (dbM)')
+    plt.ylabel('Return Power (dbM)')
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    ax.get_yaxis().get_major_formatter().set_useOffset(False)
+    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    plt.tight_layout()
+    plt.title('I^2 + Q^2 versus returned power')
+    plt.savefig('./Figures/hw3q2_fig3_%s.png'%saveInfo, dpi=350)
+    plt.close()
+
+def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, plotQ):
+        # Generate figure
+        sns.set_context('talk')
+        sns.set_style('ticks')
+        plt.figure()
+        ax = plt.subplot(212)
+        plt.scatter(velocity, Pxx_den)
+        plt.grid()
+        ax.spines['top'].set_color('none')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.spines['right'].set_color('none')
+        ax.yaxis.set_ticks_position('left')
+        plt.xlim(-20, 20)
+        plt.ylim(np.min(Pxx_den), 1.1 * np.max(Pxx_den))
+        plt.xlabel('Radial Velocity (m/s)')
+        plt.ylabel('PSD [Watts/(m/s)]')
+        
+        ax = plt.subplot(211)
+        plt.plot(transmitArr, iOut, label='i')
+        if plotQ == True:
+            plt.plot(transmitArr, qOut, label='q')
+        plt.legend()
+        plt.grid()
+        ax.spines['top'].set_color('none')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.spines['right'].set_color('none')
+        ax.yaxis.set_ticks_position('left')
+        plt.tight_layout()
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.xlim(0,)
+        plt.savefig('./Figures/%s' % saveName, dpi=350)
+        plt.close()
+
+
+def generatePt3q3Figures(transmitArr, iOut, qOut, samplingFreq, 
+                         wavelength, saveInfo):
+
+    # Calculate periodogram
+    realPlusI = iOut[:] + 1j * qOut[:]
+    f1, Pxx_realPlusI = signal.periodogram(realPlusI, samplingFreq)
+    f2, Pxx_I = signal.periodogram(iOut, samplingFreq)
+    velocity1 = (f1 * wavelength) / 2  # radial velocity
+    velocity2 = (f2 * wavelength) / 2  # radial velocity    
+    makePeriodogram('hw3q3_fig1_%s'%saveInfo, velocity1,
+                    Pxx_realPlusI, transmitArr, iOut, qOut, plotQ= True)
+    makePeriodogram('hw3q3_fig2_%s'%saveInfo, velocity2,
+                    Pxx_I, transmitArr, iOut, qOut, plotQ = False)
+
+
+def generateFigures(transmitArr, arrivalTimeArr, returnPowerArr, 
+                    sampleArr, snrArr):
+
     sns.set_context('talk')
     sns.set_style('ticks')
 
