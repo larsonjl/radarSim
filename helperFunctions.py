@@ -238,6 +238,22 @@ def generatePt3q3Figures(transmitArr, iOut, qOut, samplingFreq,
                     Pxx_I, transmitArr, iOut, qOut, plotQ = False)
 
 
+def generatePt3q4Figures(transmitArr, iOut, qOut, samplingFreq, 
+                         wavelength, saveInfo):
+    
+    realPlusI = iOut[:] + 1j * qOut[:]
+    f1, Pxx_realPlusI = signal.periodogram(realPlusI, samplingFreq)
+    f2, Pxx_I = signal.periodogram(iOut, samplingFreq)
+    velocity1 = (f1 * wavelength) / 2  # radial velocity
+    velocity2 = (f2 * wavelength) / 2  # radial velocity    
+    makePeriodogram('hw3q4_fig1_%s'%saveInfo, velocity1,
+                    Pxx_realPlusI, transmitArr, iOut, qOut, plotQ= True)
+    makePeriodogram('hw3q4_fig2_%s'%saveInfo, velocity2,
+                    Pxx_I, transmitArr, iOut, qOut, plotQ = False)
+
+    
+    
+
 def generateFigures(transmitArr, arrivalTimeArr, returnPowerArr, 
                     sampleArr, snrArr):
 

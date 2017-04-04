@@ -42,6 +42,7 @@ qOut = np.zeros((nPts))
 integrateTime = np.zeros((nPts))
 
 cohereTrack = 0
+noiseOn = True
 
 # Main method to perform simulation
 # while time <= simulationAttributes.runtime + radarVals.tIpp().v:
@@ -56,6 +57,9 @@ while ptNum < nPts:
         returnTime = calculateValues.expectedTime(targetLocation).v
         returnPower = calculateValues.findPower(targetLocation).v
         targetRange = np.linalg.norm(targetLocation)
+        
+        if noiseOn == True:
+            returnPower += chiNoise(1, 2e-14, 4)
 
         # Store transmit, arrival times, and power
         transmitArr[i] = time
@@ -69,6 +73,10 @@ while ptNum < nPts:
         qIntegrate[cohereTrack] = np.sqrt(returnPower) * np.sin(
                                     - 2 * targetRange * (radarVals.wavenumber().v))  
         integrateTimeArr[cohereTrack] = time + returnTime
+
+        if noiseOn == True:
+            iIntegrate[cohereTrack] += expNoise(1, 2e-14)
+            qIntegrate[cohereTrack] += expNoise(1, 2e-14)
 
         # Timing of gates relative to when pulse is sent (length =  #gates + 1)
         gateTimeArray = radarVals.gateTimeIntervalArray().v
@@ -99,6 +107,7 @@ print("Final Position %f, %f m" %(targetLocation[0], targetLocation[1] ))
 print("Time on Target: %f s" %time)
 # helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, returnPowerArr, 'approach')
 # helperFunctions.generatePt3q3Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'approach')
+helperFunctions.generatePt3q4Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'approach')
 
 '''
 #### ===== Print final values after simulation ===== ####
