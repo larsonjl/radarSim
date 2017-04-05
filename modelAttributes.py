@@ -52,7 +52,7 @@ class radarVals:
 
     class fftPts:
         def __init__(self):
-            self.v = 256
+            self.v = 128
             self.nameString = "Points used for FFT"
             self.units = "nPts"
  
@@ -80,7 +80,7 @@ class radarVals:
     
     class wavenumber:
         def __init__(self):
-            self.v = 1 / freq2lambda(radarVals.frequency().v)
+            self.v = (2 * np.pi) / freq2lambda(radarVals.frequency().v)
             self.nameString = "wavenumber"
             self.units = "1/m"
     
@@ -214,7 +214,7 @@ class targetVals:
 
     class attackAngle:
         def __init__(self):
-            self.v = 270
+            self.v = 90
             self.nameString = "Target angle of attack"
             self.units = "degrees"
 

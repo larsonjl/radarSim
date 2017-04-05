@@ -105,9 +105,9 @@ while ptNum < nPts:
 print("Initial Position %f, %f m" %(targetVals.initPosition().v[0], targetVals.initPosition().v[1] ))
 print("Final Position %f, %f m" %(targetLocation[0], targetLocation[1] ))
 print("Time on Target: %f s" %time)
-# helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, returnPowerArr, 'approach')
+# helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, returnPowerArr, 'recede')
 # helperFunctions.generatePt3q3Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'approach')
-helperFunctions.generatePt3q4Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'approach')
+helperFunctions.generatePt3q4Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'recede')
 
 '''
 #### ===== Print final values after simulation ===== ####
