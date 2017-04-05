@@ -212,7 +212,7 @@ class targetVals:
             self.nameString = "Target speed"
             self.units = "m/s"
 
-    class attackAngle:
+    class approachAngle:
         def __init__(self):
             self.v = 90
             self.nameString = "Target angle of attack"
@@ -286,11 +286,11 @@ class  calculateValues:
             self.units = 's'
     
     class findPosition:
-        def __init__(self,  previousLocation):
+        def __init__(self,  previousLocation, attackAngle):
             targetGradient = [np.cos(degrees2radians(
-                                        targetVals.attackAngle().v)),
+                                        attackAngle)),
                               np.sin(degrees2radians(
-                                      targetVals.attackAngle().v))]
+                                      attackAngle))]
         
             x_target = previousLocation[0] + \
                         targetGradient[0] * targetVals.targetSpeed().v * \

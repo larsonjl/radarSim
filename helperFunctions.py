@@ -152,7 +152,7 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     sns.set_context('talk')
     sns.set_style('ticks')
     ax = plt.subplot(111)
-    plt.plot(iOut, qOut)
+    plt.plot(iOut[0:20], qOut[0:20])
     plt.xlabel('I')
     plt.ylabel('Q')
     plt.grid()
@@ -164,6 +164,7 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
     ax.set_aspect('equal', 'datalim')
+    plt.title('Phasor diagram (bursts 1-20)')
     plt.savefig('./Figures/hw3q2_fig2_%s.png'%saveInfo, dpi=350)
     plt.close()
     
@@ -188,7 +189,7 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     plt.savefig('./Figures/hw3q2_fig3_%s.png'%saveInfo, dpi=350)
     plt.close()
 
-def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, plotQ):
+def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, xlims, plotQ):
         # Generate figure
         sns.set_context('talk')
         sns.set_style('ticks')
@@ -200,7 +201,8 @@ def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, plotQ)
         ax.xaxis.set_ticks_position('bottom')
         ax.spines['right'].set_color('none')
         ax.yaxis.set_ticks_position('left')
-        plt.xlim(-20, 20)
+        plt.xlim(xlims[0], xlims[1])
+        print(np.max(Pxx_den))
         plt.ylim(np.min(Pxx_den), 1.1 * np.max(Pxx_den))
         plt.xlabel('Radial Velocity (m/s)')
         plt.ylabel('PSD [Watts/(m/s)]')
@@ -224,18 +226,18 @@ def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, plotQ)
 
 
 def generatePt3q3Figures(transmitArr, iOut, qOut, samplingFreq, 
-                         wavelength, saveInfo):
+                         wavelength, xlims, numIntegrate, saveInfo):
 
     # Calculate periodogram
     realPlusI = iOut[:] + 1j * qOut[:]
-    f1, Pxx_realPlusI = signal.periodogram(realPlusI, samplingFreq)
-    f2, Pxx_I = signal.periodogram(iOut, samplingFreq)
+    f1, Pxx_realPlusI = signal.periodogram(realPlusI, samplingFreq / numIntegrate)
+    f2, Pxx_I = signal.periodogram(iOut, samplingFreq / numIntegrate )
     velocity1 = (f1 * wavelength) / 2  # radial velocity
     velocity2 = (f2 * wavelength) / 2  # radial velocity    
     makePeriodogram('hw3q3_fig1_%s'%saveInfo, velocity1,
-                    Pxx_realPlusI, transmitArr, iOut, qOut, plotQ= True)
+                    Pxx_realPlusI, transmitArr, iOut, qOut, xlims, plotQ= True)
     makePeriodogram('hw3q3_fig2_%s'%saveInfo, velocity2,
-                    Pxx_I, transmitArr, iOut, qOut, plotQ = False)
+                    Pxx_I, transmitArr, iOut, qOut, xlims, plotQ = False)
 
 
 def generatePt3q4Figures(transmitArr, iOut, qOut, samplingFreq, 
@@ -247,9 +249,9 @@ def generatePt3q4Figures(transmitArr, iOut, qOut, samplingFreq,
     velocity1 = (f1 * wavelength) / 2  # radial velocity
     velocity2 = (f2 * wavelength) / 2  # radial velocity    
     makePeriodogram('hw3q4_fig1_%s'%saveInfo, velocity1,
-                    Pxx_realPlusI, transmitArr, iOut, qOut, plotQ= True)
+                    Pxx_realPlusI, transmitArr, iOut, qOut, [-20, 20], plotQ= True)
     makePeriodogram('hw3q4_fig2_%s'%saveInfo, velocity2,
-                    Pxx_I, transmitArr, iOut, qOut, plotQ = False)
+                    Pxx_I, transmitArr, iOut, qOut, [-20, 20], plotQ = False)
 
     
     
