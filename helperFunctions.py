@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy  as np
 from scipy import signal
-from modelAttributes import radarVals, linear2db, finalValues, expNoise, chiNoise
+from modelAttributes import radarVals, linear2db, finalValues, expNoise,
+                            chiNoise
 
 
 # Print  out initial attributes
@@ -152,7 +153,13 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     sns.set_context('talk')
     sns.set_style('ticks')
     ax = plt.subplot(111)
-    plt.plot(iOut[0:20], qOut[0:20])
+    plt.plot(iOut[0:25], qOut[0:25])
+    plt.scatter(iOut[0], qOut[0], c='g')
+    plt.text(iOut[0], qOut[0], 'Start')
+    
+    plt.scatter(iOut[24], qOut[24], c='r')
+    plt.text(iOut[24], qOut[24], 'End')
+
     plt.xlabel('I')
     plt.ylabel('Q')
     plt.grid()
@@ -164,7 +171,7 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     ax.get_yaxis().get_major_formatter().set_useOffset(False)
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
     ax.set_aspect('equal', 'datalim')
-    plt.title('Phasor diagram (bursts 1-20)')
+    plt.title('Phasor diagram (bursts 1-25)')
     plt.savefig('./Figures/hw3q2_fig2_%s.png'%saveInfo, dpi=350)
     plt.close()
     
@@ -189,25 +196,81 @@ def generatePt3q2Figures(arrivalTimeArr, iOut, qOut, powerMeas, saveInfo):
     plt.savefig('./Figures/hw3q2_fig3_%s.png'%saveInfo, dpi=350)
     plt.close()
 
-def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, xlims, plotQ):
+def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, 
+                    qOut, xlims, plotQ, twinx):
+    Pxx_den = (2/radarVals.wavelength().v) * Pxx_den
+
+    # Generate figure
+    sns.set_context('talk')
+    sns.set_style('ticks')
+    plt.figure()
+    ax = plt.subplot(212)
+    plt.scatter(velocity, Pxx_den)
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    plt.xlim(xlims[0], xlims[1])
+    print(np.max(Pxx_den))
+    plt.ylim(np.min(Pxx_den), 1.1 * np.max(Pxx_den))
+    plt.xlabel('Radial Velocity (m/s)')
+    plt.ylabel('PSD [Watts/(m/s)]')
+    ax = plt.subplot(211)
+    plt.plot(transmitArr, iOut, label='i')
+    if plotQ == True:
+        plt.plot(transmitArr, qOut, label='q')
+    plt.legend()
+    plt.grid()
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.spines['right'].set_color('none')
+    ax.yaxis.set_ticks_position('left')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Amplitude')
+    plt.xlim(0,)
+    plt.tight_layout()
+    plt.savefig('./Figures/%s' % saveName, dpi=350)
+    plt.close()
+        
+def makePeriodogramQ4(saveName, velocity, Pxx_den, transmitArr, iOut, 
+                      qOut, xlims, plotQ, twinx):
+        # TODO: Check this    
+        Pxx_den = (2/radarVals.wavelength().v) * Pxx_den
+    
         # Generate figure
         sns.set_context('talk')
         sns.set_style('ticks')
-        plt.figure()
-        ax = plt.subplot(212)
-        plt.scatter(velocity, Pxx_den)
+        plt.figure(figsize=(8,14))
+        ax = plt.subplot(413)
+        Pxx_den_db = np.zeros((len(Pxx_den)))
+        for i in range(0,len(Pxx_den)):
+            Pxx_den_db[i] = linear2db(Pxx_den[i])
+        plt.scatter(velocity, Pxx_den_db, s=20)
         plt.grid()
         ax.spines['top'].set_color('none')
         ax.xaxis.set_ticks_position('bottom')
         ax.spines['right'].set_color('none')
         ax.yaxis.set_ticks_position('left')
         plt.xlim(xlims[0], xlims[1])
-        print(np.max(Pxx_den))
+        plt.ylim(-210, 20 + np.max(Pxx_den_db))
+        plt.xlabel('Radial Velocity (m/s)')
+        plt.ylabel('PSD [db Watts/(m/s)]')
+    
+
+        ax = plt.subplot(412)
+        plt.scatter(velocity, Pxx_den, s=20)
+        plt.grid()
+        ax.spines['top'].set_color('none')
+        ax.xaxis.set_ticks_position('bottom')
+        ax.spines['right'].set_color('none')
+        ax.yaxis.set_ticks_position('left')
+        plt.xlim(xlims[0], xlims[1])
         plt.ylim(np.min(Pxx_den), 1.1 * np.max(Pxx_den))
         plt.xlabel('Radial Velocity (m/s)')
         plt.ylabel('PSD [Watts/(m/s)]')
-        
-        ax = plt.subplot(211)
+
+        ax = plt.subplot(411)
         plt.plot(transmitArr, iOut, label='i')
         if plotQ == True:
             plt.plot(transmitArr, qOut, label='q')
@@ -217,12 +280,25 @@ def makePeriodogram(saveName, velocity, Pxx_den, transmitArr, iOut, qOut, xlims,
         ax.xaxis.set_ticks_position('bottom')
         ax.spines['right'].set_color('none')
         ax.yaxis.set_ticks_position('left')
-        plt.tight_layout()
         plt.xlabel('Time (s)')
         plt.ylabel('Amplitude')
         plt.xlim(0,)
+        plt.tight_layout()
+        
+        ax = plt.subplot(412)
+        # Calculate SNR
+        maxSignal = np.max(Pxx_den)
+        meanSignal = np.mean((Pxx_den[(Pxx_den < maxSignal) * (Pxx_den > 0)]))
+        snr = linear2db(maxSignal/meanSignal)
+        
+        # Calculate target velocity
+        velocityTarg = velocity[np.argmax(Pxx_den)]
+        plt.figtext(0.2, 0.11, 'Velocity Estimate = %.2f m/s'%velocityTarg)
+        plt.figtext(0.2, 0.08, 'Noise Power = %.2f dB'%linear2db(meanSignal))
+        plt.figtext(0.2, 0.05, 'SNR = %.2f dB'%snr)
         plt.savefig('./Figures/%s' % saveName, dpi=350)
         plt.close()
+        
 
 
 def generatePt3q3Figures(transmitArr, iOut, qOut, samplingFreq, 
@@ -230,14 +306,17 @@ def generatePt3q3Figures(transmitArr, iOut, qOut, samplingFreq,
 
     # Calculate periodogram
     realPlusI = iOut[:] + 1j * qOut[:]
-    f1, Pxx_realPlusI = signal.periodogram(realPlusI, samplingFreq / numIntegrate)
+    f1, Pxx_realPlusI = signal.periodogram(realPlusI,
+                                           samplingFreq / numIntegrate)
     f2, Pxx_I = signal.periodogram(iOut, samplingFreq / numIntegrate )
     velocity1 = (f1 * wavelength) / 2  # radial velocity
     velocity2 = (f2 * wavelength) / 2  # radial velocity    
     makePeriodogram('hw3q3_fig1_%s'%saveInfo, velocity1,
-                    Pxx_realPlusI, transmitArr, iOut, qOut, xlims, plotQ= True)
+                    Pxx_realPlusI, transmitArr, iOut, qOut, xlims,
+                    plotQ= True, twinx = False)
     makePeriodogram('hw3q3_fig2_%s'%saveInfo, velocity2,
-                    Pxx_I, transmitArr, iOut, qOut, xlims, plotQ = False)
+                    Pxx_I, transmitArr, iOut, qOut,
+                    xlims, plotQ = False, twinx = False)
 
 
 def generatePt3q4Figures(transmitArr, iOut, qOut, samplingFreq, 
@@ -248,10 +327,12 @@ def generatePt3q4Figures(transmitArr, iOut, qOut, samplingFreq,
     f2, Pxx_I = signal.periodogram(iOut, samplingFreq)
     velocity1 = (f1 * wavelength) / 2  # radial velocity
     velocity2 = (f2 * wavelength) / 2  # radial velocity    
-    makePeriodogram('hw3q4_fig1_%s'%saveInfo, velocity1,
-                    Pxx_realPlusI, transmitArr, iOut, qOut, [-20, 20], plotQ= True)
-    makePeriodogram('hw3q4_fig2_%s'%saveInfo, velocity2,
-                    Pxx_I, transmitArr, iOut, qOut, [-20, 20], plotQ = False)
+    makePeriodogramQ4('hw3q4_fig1_%s'%saveInfo, velocity1,
+                    Pxx_realPlusI, transmitArr, iOut, qOut,
+                    [-50, 50], plotQ= True, twinx = True)
+    makePeriodogramQ4('hw3q4_fig2_%s'%saveInfo, velocity2,
+                    Pxx_I, transmitArr, iOut, qOut, [-50, 50],
+                    plotQ = False, twinx = True)
 
     
     

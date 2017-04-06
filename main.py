@@ -51,37 +51,43 @@ def runSimulation(numIntegrate, attackAngle, noiseOn):
         integrateTimeArr = np.zeros((numIntegrate))
         while cohereTrack < numIntegrate:
             # Update Target position, return time, and return power
-            targetLocation = calculateValues.findPosition(targetLocation, attackAngle).v
+            targetLocation = calculateValues.findPosition(targetLocation, 
+                                                          attackAngle).v
             returnTime = calculateValues.expectedTime(targetLocation).v
             returnPower = calculateValues.findPower(targetLocation).v
             targetRange = np.linalg.norm(targetLocation)
-            
+            print(returnPower)
             if noiseOn == True:
-                returnPower += chiNoise(1, 2e-14, 4)
-    
+                returnPower = chiNoise(1, returnPower, 4)
             # Store transmit, arrival times, and power
             transmitArr[i] = time
             arrivalTimeArr[i] = returnTime
             targetRangeArr[i] = targetRange
             returnPowerArr[i] = linear2db(returnPower) + 30  # dBm
-        
+    
+                
             # Store coherent integration information
             iIntegrate[cohereTrack] = np.sqrt(returnPower) * np.cos(
-                                        - 2 * targetRange * (radarVals.wavenumber().v))
+                                        - 2 * targetRange * (
+                                                radarVals.wavenumber().v))
             qIntegrate[cohereTrack] = np.sqrt(returnPower) * np.sin(
-                                        - 2 * targetRange * (radarVals.wavenumber().v))  
+                                         - 2 * targetRange * (
+                                                 radarVals.wavenumber().v))  
             integrateTimeArr[cohereTrack] = time + returnTime
     
             if noiseOn == True:
-                iIntegrate[cohereTrack] += expNoise(1, 2e-14)
-                qIntegrate[cohereTrack] += expNoise(1, 2e-14)
+                iIntegrate[cohereTrack] = iIntegrate[cohereTrack] + \
+                                                expNoise(1, 2e-14)
+                qIntegrate[cohereTrack] = qIntegrate[cohereTrack] + \
+                                                expNoise(1, 2e-14)
     
             # Timing of gates relative to when pulse is sent (length =  #gates + 1)
             gateTimeArray = radarVals.gateTimeIntervalArray().v
     
             # Find gate indx of return pulse,
             gateLocation = (gateTimeArray >= returnTime) * \
-                           (gateTimeArray < returnTime + radarVals.pulseWidth().v)
+                           (gateTimeArray < 
+                            returnTime + radarVals.pulseWidth().v)
             gateIndx = np.where(gateLocation > 0)
     
             # Store return power in appropriate bins
@@ -99,14 +105,15 @@ def runSimulation(numIntegrate, attackAngle, noiseOn):
     
         ptNum += 1
 
-    print("Initial Position %f, %f m" %(targetVals.initPosition().v[0], targetVals.initPosition().v[1] ))
+    print("Initial Position %f, %f m" %(targetVals.initPosition().v[0], 
+                                        targetVals.initPosition().v[1] ))
     print("Final Position %f, %f m" %(targetLocation[0], targetLocation[1] ))
     print("Time on Target: %f s" %time)
 
     return integrateTime, iOut, qOut, returnPowerArr
 
 #### ===== Make Plots for pt3 q2 ===== ####
-
+'''
 # Run question 1 #
 print("Running Question 1")
 helperFunctions.generatePt3q1Figures()
@@ -114,59 +121,34 @@ helperFunctions.generatePt3q1Figures()
 # Run Question 2 #
 print("Running Question 2 approach and recede")
 integrateTime, iOut, qOut, returnPowerArr = runSimulation(1, 270, False)
-helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, returnPowerArr, 'approach')
+helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, 
+                                         returnPowerArr, 'approach')
 integrateTime, iOut, qOut, returnPowerArr = runSimulation(1, 90, False)
-helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, returnPowerArr, 'recede')
+helperFunctions.generatePt3q2Figures(integrateTime, iOut, qOut, 
+                                     returnPowerArr, 'recede')
 
 # Run Question 3 #
 print("# ==== Running Question 3 approach and recede ==== #")
 integrateTime, iOut, qOut, returnPowerArr = runSimulation(1, 270, False)
-helperFunctions.generatePt3q3Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, [-25, 25], 1,'approach')
+helperFunctions.generatePt3q3Figures(integrateTime, 
+                                     iOut, qOut, 1/radarVals.tIpp().v, 
+                                     radarVals.wavelength().v, [-25, 25],
+                                     1,'approach')
 integrateTime, iOut, qOut, returnPowerArr = runSimulation(1, 90, False)
-helperFunctions.generatePt3q3Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, [-25,25], 1, 'recede')
-integrateTime, iOut, qOut, returnPowerArr = runSimulation(5, 270, False)
-helperFunctions.generatePt3q3Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, [-25, 25], 5, 'recede_ncoh5')
+helperFunctions.generatePt3q3Figures(integrateTime,
+                                     iOut, qOut, 1/radarVals.tIpp().v, 
+                                     radarVals.wavelength().v, [-25,25],
+                                     1, 'recede')
+integrateTime, iOut, qOut, returnPowerArr = runSimulation(5, 90, False)
+helperFunctions.generatePt3q3Figures(integrateTime, 
+                                     iOut, qOut, 1/radarVals.tIpp().v,
+                                     radarVals.wavelength().v, [-25, 25], 5, 
+                                     'recede_ncoh5')
 
+'''
 # Run Question 4 #
 print("# ==== Running Question 4 approach and recede ==== #")
 integrateTime, iOut, qOut, returnPowerArr = runSimulation(1, 90, True)
-
-helperFunctions.generatePt3q4Figures(integrateTime, iOut, qOut, 1/radarVals.tIpp().v, radarVals.wavelength().v, 'recede')
-
-'''
-#### ===== Print final values after simulation ===== ####
-helperFunctions.printFinalValues(transmitArr[-1],
-                                 db2linear(returnPowerArr[-1] - 30),
-                                 arrivalTimeArr[-1], targetRangeArr[-1])
-
-#### ===== Generate final figures ===== ####
-helperFunctions.generateFigures(transmitArr, arrivalTimeArr,
-                                returnPowerArr, sampleArr, snrArr)
-
-#### =====  Calculate radial velocity and plot ===== ####
-
-targRangeFromSNR = np.zeros((transLength))
-
-for i in range(0, transLength):
-    index = np.argmax(snrArr[:,i])
-    targRangeFromSNR[i] = radarVals.gateTimeIntervalArray().v[index] * 3e8/2
-
-timeArr = np.arange(0,  simulationAttributes.runtime + 2*radarVals.tIpp().v,
-                    radarVals.tIpp().v)
-windowSize = 20000
-timeDiff = timeArr[windowSize] - timeArr[0]
-timeDiff2 = timeArr[10] - timeArr[0]
-
-drdtArr = np.zeros((transLength))
-drdtTrue = np.zeros((transLength))
-
-for i in range(10, transLength):
-    drdtTrue[i] = (targetRangeArr[i] - targetRangeArr[i-10]) / timeDiff2
-
-for i in range(windowSize, transLength):
-    drdtArr[i] = (targRangeFromSNR[i] - targRangeFromSNR[i-windowSize]) / \
-           timeDiff
-
-#### ==== Plot radial velocity ===== ####
-helperFunctions.radialVelocityPlot(timeArr, drdtArr, drdtTrue)
-'''
+helperFunctions.generatePt3q4Figures(integrateTime,
+                                     iOut, qOut, 1/radarVals.tIpp().v, 
+                                     radarVals.wavelength().v, 'recede_100less')

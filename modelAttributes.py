@@ -31,7 +31,8 @@ def expNoise(samples, meanValue):
 
 def chiNoise(samples, meanValue, freedomDegrees):
     xx = np.linspace(0, 4 * meanValue, 1000)
-    pdf = ((freedomDegrees * xx) / (meanValue**2)) * np.exp((-2 * xx) / meanValue)
+    pdf = ((freedomDegrees * xx) / (meanValue**2)) * \
+            np.exp((-2 * xx) / meanValue)
     pdf = pdf / np.sum(pdf)
     cumVals = np.cumsum(pdf)
     invCdf = interpolate.interp1d(cumVals, xx)
@@ -58,7 +59,7 @@ class radarVals:
  
     class transPower:
         def __init__(self):
-            self.v = 10e3
+            self.v = 1
             self.nameString = "Transmitted Power"
             self.units = "W"
 
@@ -207,7 +208,7 @@ class targetVals:
 
     class targetSpeed:
         def __init__(self):
-            self.v =  (freq2lambda(radarVals.frequency().v) / radarVals.tIpp().v ) \
+            self.v = (freq2lambda(radarVals.frequency().v) / radarVals.tIpp().v ) \
                         * (2/radarVals.fftPts().v)
             self.nameString = "Target speed"
             self.units = "m/s"
