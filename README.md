@@ -1,1 +1,1 @@
-An aircraft based radar simulator for ASEN5245
+An aircraft based radar simulator for ASEN5254
